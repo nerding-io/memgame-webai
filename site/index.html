@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Memory Game</title>
+    <link rel="stylesheet" href="styles.css" />
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#1a365d" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+    <!-- Register Service Worker -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("./sw.js", { scope: "./" })
+            .then((registration) => {
+              console.log("ServiceWorker registration successful");
+            })
+            .catch((err) => {
+              console.log("ServiceWorker registration failed: ", err);
+            });
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Top Navigation Bar -->
+      <div class="nav-bar">
+        <div class="game-title">Select Game</div>
+        <div class="nav-icons">
+          <button class="nav-btn" id="randomBtn" aria-label="Random Category">
+            <i class="icon-shuffle">
+              <svg
+                class="w-6 h-6 text-gray-800 dark:text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13.484 9.166 15 7h5m0 0-3-3m3 3-3 3M4 17h4l1.577-2.253M4 7h4l7 10h5m0 0-3 3m3-3-3-3"
+                />
+              </svg>
+            </i>
+          </button>
+          <button
+            class="nav-btn"
+            id="refreshBtn"
+            aria-label="Refresh Current Game"
+          >
+            <i class="icon-refresh">
+              <svg
+                class="w-6 h-6 text-gray-800 dark:text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="m16 10 3-3m0 0-3-3m3 3H5v3m3 4-3 3m0 0 3 3m-3-3h14v-3"
+                />
+              </svg>
+            </i>
+          </button>
+          <button
+            class="nav-btn"
+            id="customBtn"
+            aria-label="Create Custom Game"
+          >
+            <i class="icon-plus"
+              ><svg
+                class="w-6 h-6 text-gray-800 dark:text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 12h14m-7 7V5"
+                />
+              </svg>
+            </i>
+          </button>
+          <button class="nav-btn" id="hintBtn" aria-label="Get Hint">
+            <i class="icon-help"
+              ><svg
+                class="w-6 h-6 text-gray-800 dark:text-white"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9.529 9.988a2.502 2.502 0 1 1 5 .191A2.441 2.441 0 0 1 12 12.582V14m-.01 3.008H12M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                />
+              </svg>
+            </i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Category Selection Grid -->
+      <div id="categoryGrid" class="category-grid"></div>
+
+      <!-- Hint Display -->
+      <div id="hintAlert" class="hint-alert hidden"></div>
+
+      <!-- Game Grid -->
+      <div id="gameGrid" class="game-grid hidden"></div>
+
+      <!-- Custom Game Modal -->
+      <div id="customModal" class="modal hidden">
+        <div class="modal-content">
+          <h2>Create Custom Game</h2>
+          <p>Let AI create a custom memory game based on your prompt.</p>
+          <div class="file-upload-area" id="dropZone">
+            <input
+              type="file"
+              id="fileInput"
+              accept=".txt,.md"
+              class="hidden"
+            />
+            <p>Drag & drop a text file here or click to upload</p>
+          </div>
+          <textarea
+            id="customPrompt"
+            placeholder="Examples:&#10;- Create pairs of famous inventors and their inventions&#10;- Make a game about opposite words&#10;- Generate pairs of problems and their solutions&#10;- Create matches between causes and their effects"
+          ></textarea>
+          <div class="button-group">
+            <button
+              id="voiceInputBtn"
+              class="voice-btn"
+              aria-label="Voice Input"
+            >
+              <svg
+                class="w-6 h-6"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9v3a5.006 5.006 0 0 1-5 5h-4a5.006 5.006 0 0 1-5-5V9m7 9v3m-3 0h6M11 3h2a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3h-2a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3Z"
+                />
+              </svg>
+            </button>
+            <button id="generateBtn">Generate Memory Game</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-left">
+          <p>
+            &copy; 2024 <a href="https://nerding.io">Nerding I/O</a>. Created
+            by Jd Fiscus
+          </p>
+        </div>
+        <div class="footer-right">
+          <a
+            href="https://github.com/nerding-io/memgame-webai"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub Repository"
+          >
+            <img
+              src="https://avatars.githubusercontent.com/u/112589382?s=48&v=4"
+              alt="GitHub"
+              height="24"
+              width="24"
+            />
+          </a>
+        </div>
+      </div>
+    </footer>
+    <script src="categories.js" type="module"></script>
+    <script src="game.js" type="module"></script>
+  </body>
+</html>

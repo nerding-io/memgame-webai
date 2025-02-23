@@ -1,0 +1,21 @@
+{
+  "name": "Memory Game",
+  "short_name": "Memory",
+  "description": "A customizable memory card game with AI-generated content",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#44337a",
+  "theme_color": "#1a365d",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
